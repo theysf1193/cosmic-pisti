@@ -411,6 +411,10 @@ header {
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(223, 177, 91, 0.4);
 }
 
+.card-3d.player-playable.flipped:hover {
+    transform: translateY(-25px) rotate(-2deg) scale(1.08) rotateY(180deg);
+}
+
 .card-face {
     position: absolute;
     width: 100%;
