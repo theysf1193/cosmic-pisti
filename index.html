@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pişti Pro - Premium İskambil Oyunu</title>
+    <meta name="description" content="Web tabanlı, modern animasyonlara, akıllı yapay zekaya ve harika ses efektlerine sahip premium Pişti oyunu.">
+    
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Space Background Container -->
+    <div id="space-bg" class="space-bg">
+        <div class="nebula"></div>
+    </div>
+
+    <!-- Ambient light glow behind the table -->
+    <div class="ambient-glow"></div>
+
+    <div class="app-container">
+        <!-- HEADER: Logo and dynamic scoreboard -->
+        <header>
+            <div class="logo-section">
+                <h1>PİŞTİ <span>PRO</span></h1>
+            </div>
+            
+            <div class="scoreboard">
+                <!-- AI Score Info -->
+                <div class="score-card ai" id="score-card-ai">
+                    <span class="player-label">Rakip (AI)</span>
+                    <span class="score-value" id="ai-score-val">0</span>
+                    <div class="mini-stats">
+                        <span>Kart: <strong id="ai-cards-count">0</strong></span>
+                        <span>Pişti: <strong id="ai-pisti-count">0</strong></span>
+                    </div>
+                </div>
+                
+                <!-- Deck Count Status -->
+                <div class="deck-info">
+                    <span class="deck-count" id="deck-remaining-count">52</span>
+                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Kart Kaldı</span>
+                </div>
+                
+                <!-- Player Score Info -->
+                <div class="score-card player" id="score-card-player">
+                    <span class="player-label">Siz</span>
+                    <span class="score-value" id="player-score-val">0</span>
+                    <div class="mini-stats">
+                        <span>Kart: <strong id="player-cards-count">0</strong></span>
+                        <span>Pişti: <strong id="player-pisti-count">0</strong></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN GAME TABLE -->
+        <main class="game-table">
+            <!-- AI HAND AREA (Cards hidden initially) -->
+            <div class="hand-container ai-hand-area">
+                <div class="cards-wrapper" id="ai-hand">
+                    <!-- AI cards will be rendered dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- CENTER BOARD (Felt & Discard Pile) -->
+            <div class="center-board">
+                <div class="felt-circle"></div>
+                
+                <!-- Remaining Deck visual stack on the left -->
+                <div class="deck-stack-on-table visible" id="deck-stack-visual">
+                    <div class="deck-back-card"></div>
+                    <div class="deck-back-card"></div>
+                    <div class="deck-back-card"></div>
+                </div>
+                
+                <!-- Visual piles showing where captured cards go -->
+                <div class="collect-pile ai">AI Toplanan</div>
+                <div class="collect-pile player">Topladıklarınız</div>
+
+                <!-- Active played pile in the center -->
+                <div class="pile-container" id="center-pile">
+                    <div class="pile-shadow"></div>
+                    <!-- Played cards will stack here dynamically -->
+                    <div class="pile-counter-badge" id="pile-counter">Boş Masa</div>
+                </div>
+
+                <!-- Pop-up announcements (e.g. Pişti, Match, Win) -->
+                <div class="game-announcement" id="game-announcement">
+                    <h2 id="announcement-title">PİŞTİ!</h2>
+                    <p id="announcement-subtitle">+10 Puan Kazandınız</p>
+                </div>
+
+                <!-- Table Controls (Sound toggle, Help modal) -->
+                <div class="control-btns">
+                    <button class="control-btn" id="sound-toggle-btn" title="Sesi Aç/Kapat">
+                        🔊
+                    </button>
+                    <button class="control-btn" id="rules-toggle-btn" title="Kurallar">
+                        ℹ️
+                    </button>
+                </div>
+            </div>
+
+            <!-- PLAYER HAND AREA (Cards visible and interactive) -->
+            <div class="hand-container player-hand-area">
+                <div class="cards-wrapper" id="player-hand">
+                    <!-- Player cards will be rendered dynamically by JS -->
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER STATUS BAR -->
+        <div class="status-bar" id="status-bar">Oyunu başlatmak için bekleyin...</div>
+    </div>
+
+    <!-- START GAME MODAL -->
+    <div class="modal-overlay visible" id="start-modal">
+        <div class="modal-content" style="max-width: 520px;">
+            <h2>PİŞTİ PRO</h2>
+            
+            <!-- Game Mode Tabs -->
+            <div class="game-mode-tabs">
+                <button class="tab-btn active" id="tab-single-btn">Tek Oyunculu (AI)</button>
+                <button class="tab-btn" id="tab-multi-btn">Çevrimiçi (Online)</button>
+            </div>
+
+            <!-- Singleplayer Panel -->
+            <div class="mode-panel active" id="single-panel">
+                <p style="margin-bottom: 15px;">Akıllı yapay zekaya karşı kozmik uzay boşluğunda pratik yapın!</p>
+                
+                <div class="difficulty-selector">
+                    <button class="diff-btn active" id="diff-normal-btn">Normal Yapay Zeka</button>
+                    <button class="diff-btn" id="diff-pro-btn">Pro Yapay Zeka</button>
+                </div>
+                
+                <div class="rules-list" style="margin-bottom: 20px;">
+                    <h3>Oyun Kuralları:</h3>
+                    <ul>
+                        <li>Desteden 4'er kart dağıtılır. Yere de 4 kart açılır.</li>
+                        <li>Yerdeki en üst kartla aynı değerde kart oynarsanız yerdeki tüm kartları toplarsınız.</li>
+                        <li><strong>Vale (J):</strong> Yerdeki tüm kartları koşulsuz toplar (Masa boşken atılırsa kalır).</li>
+                        <li><strong>Pişti:</strong> Yerde tek kart varken eşini atarsanız pişti olur (+10 Puan).</li>
+                        <li><strong>Vale Piştisi:</strong> Yerde tek Vale varken Vale atarsanız pişti olur (+20 Puan).</li>
+                        <li><strong>Puanlama:</strong> As 1, Vale 1, Karo 10 3, Sinek 2 2 Puan. Kart çoğunluğu (27+ kart) +3 Puan.</li>
+                    </ul>
+                </div>
+                
+                <button class="btn-primary" id="start-game-btn">OYUNA BAŞLA</button>
+            </div>
+
+            <!-- Multiplayer Panel -->
+            <div class="mode-panel" id="multi-panel">
+                <p style="margin-bottom: 15px;">Arkadaşınızla gerçek zamanlı online karşılıklı oynayın!</p>
+                
+                <div class="nickname-section">
+                    <input type="text" class="lobby-input" id="nickname-input" placeholder="Takma Adınızı Yazın..." maxlength="12">
+                </div>
+
+                <div class="multiplayer-actions">
+                    <!-- Create Room -->
+                    <div class="lobby-action-box">
+                        <button class="btn-primary" id="btn-create-room">ODA OLUŞTUR</button>
+                    </div>
+                    
+                    <div class="lobby-divider"><span>VEYA ODAYA KATILIN</span></div>
+
+                    <!-- Join Room -->
+                    <div class="lobby-action-box join-box">
+                        <input type="text" class="lobby-input" id="join-code-input" placeholder="ODA KODU (Örn: GXYZ)..." maxlength="5">
+                        <button class="btn-secondary" id="btn-join-room">ODAYA KATIL</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lobby Waiting Panel -->
+            <div class="mode-panel" id="lobby-waiting-panel">
+                <h3 style="color: var(--gold); font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 10px;">ODA OLUŞTURULDU!</h3>
+                
+                <div class="room-code-display">
+                    <span>ODA KODU</span>
+                    <strong id="display-room-code">-----</strong>
+                </div>
+                
+                <p class="waiting-text" style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 15px;">
+                    Arkadaşınıza bu kodu gönderin. Katılması bekleniyor...
+                </p>
+                
+                <div class="cosmic-spinner"></div>
+                
+                <div class="lobby-players-list">
+                    <div class="player-slot active" id="slot-player-1">
+                        👤 <span id="lobby-player-1">Siz</span> <span class="player-status-tag">Bağlandı</span>
+                    </div>
+                    <div class="player-slot" id="slot-player-2">
+                        👤 <span id="lobby-player-2">Bekleniyor...</span> <span class="player-status-tag waiting">Bekleniyor</span>
+                    </div>
+                </div>
+                
+                <button class="btn-danger" id="btn-leave-lobby">LOBİDEN AYRIL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div class="modal-overlay" id="game-over-modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <h2 id="game-over-title">TEBRİKLER, KAZANDINIZ!</h2>
+            <p id="game-over-message">Harika bir oyun çıkardınız. İşte detaylı skor tablosu:</p>
+            
+            <!-- Detailed breakdown scoreboard -->
+            <table class="scoreboard-table">
+                <thead>
+                    <tr>
+                        <th>Puan Türü</th>
+                        <th class="player-col">Siz</th>
+                        <th class="ai-col">Rakip</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Pişti Puanları</td>
+                        <td class="player-col" id="breakdown-player-pisti">0</td>
+                        <td class="ai-col" id="breakdown-ai-pisti">0</td>
+                    </tr>
+                    <tr>
+                        <td>Özel Kart Puanları</td>
+                        <td class="player-col" id="breakdown-player-specials">0</td>
+                        <td class="ai-col" id="breakdown-ai-specials">0</td>
+                    </tr>
+                    <tr>
+                        <td>Kart Çoğunluğu (+3 Puan)</td>
+                        <td class="player-col" id="breakdown-player-bulk">0</td>
+                        <td class="ai-col" id="breakdown-ai-bulk">0</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>TOPLAM PUAN</td>
+                        <td class="player-col" id="breakdown-player-total">0</td>
+                        <td class="ai-col" id="breakdown-ai-total">0</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 25px;">
+                Toplanan Toplam Kart: Siz: <span id="breakdown-player-cards-total">0</span> | AI: <span id="breakdown-ai-cards-total">0</span>
+            </div>
+
+            <button class="btn-primary" id="restart-game-btn">TEKRAR OYNA</button>
+        </div>
+    </div>
+
+    <!-- RULES MODAL (ACCESSIBLE DURING GAMEPLAY) -->
+    <div class="modal-overlay" id="rules-modal">
+        <div class="modal-content">
+            <h2>Puanlama ve Kurallar</h2>
+            <div class="rules-list" style="max-height: 300px;">
+                <ul>
+                    <li><strong>Pişti:</strong> Yerde tek kart varken eşini atmak (10 Puan).</li>
+                    <li><strong>Vale Piştisi:</strong> Yerde tek Vale varken Vale atmak (20 Puan).</li>
+                    <li><strong>Vale (J):</strong> Yerdeki tüm kartları toplar (1 Puan).</li>
+                    <li><strong>As (A):</strong> 1 Puan kazandırır.</li>
+                    <li><strong>Karo 10 (♦10):</strong> 3 Puan kazandırır.</li>
+                    <li><strong>Sinek 2 (♣2):</strong> 2 Puan kazandırır.</li>
+                    <li><strong>Kart Çoğunluğu (27+ kart):</strong> 3 Puan kazandırır.</li>
+                </ul>
+            </div>
+            <button class="btn-primary" id="close-rules-btn">OYUNA DÖN</button>
+        </div>
+    </div>
+
+    <!-- PeerJS WebRTC P2P Library for serverless online play -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <!-- Javascript Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
